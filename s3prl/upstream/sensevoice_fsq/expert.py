@@ -65,6 +65,7 @@ class UpstreamExpert(nn.Module):
 
         wavs = pad_sequence(wavs, batch_first=True).unsqueeze(-1)
         # wavs: (batch_size, max_len, 1)
+        import pdb; pdb.set_trace()
 
         hidden = self.model1(wavs)
         # hidden: (batch_size, max_len, hidden_dim)
