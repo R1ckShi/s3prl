@@ -66,12 +66,11 @@ class UpstreamExpert(nn.Module):
                     loaded[k[14:]] = loaded[k]
                     del loaded[k]
                     logging.warning("Keeping key in encoder: {}".format(k[14:]))
-            # import pdb; pdb.set_trace()
             self.encoder.load_state_dict(loaded)
         
         # The model needs to be a nn.Module for finetuning, not required for representation extraction
-        self.model1 = nn.Linear(1, HIDDEN_DIM)
-        self.model2 = nn.Linear(HIDDEN_DIM, HIDDEN_DIM)
+        # self.model1 = nn.Linear(1, HIDDEN_DIM)
+        # self.model2 = nn.Linear(HIDDEN_DIM, HIDDEN_DIM)
 
     def get_downsample_rates(self, key: str) -> int:
         """
@@ -97,7 +96,7 @@ class UpstreamExpert(nn.Module):
         
         hidden = codes
         # hidden: (batch_size, max_len, hidden_dim)
-        feature = self.model2(hidden)
+        feature = codes
         # feature: (batch_size, max_len, hidden_dim)
 
         # The "hidden_states" key will be used as default in many cases
