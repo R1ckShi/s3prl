@@ -27,4 +27,4 @@ frontend_conf:
     fs: 16000
     n_mels: 128
     do_pad_trim: false
-    filters_path: mel_filters.npz
+    filters_path: /nfs/beinian.lzr/workspace/models/funasr_results/asr/whisper/SenseVoiceFSQ_0918_l30/assets/mel_filters.npz

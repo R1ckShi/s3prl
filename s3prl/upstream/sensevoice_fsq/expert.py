@@ -2,6 +2,8 @@ from collections import OrderedDict
 from typing import Dict, List, Union
 
 import yaml
+import torch
+import logging
 import torch.nn as nn
 from torch import Tensor
 from torch.nn.utils.rnn import pad_sequence
@@ -40,12 +42,33 @@ class UpstreamExpert(nn.Module):
         with open(model_config, 'r', encoding='utf-8') as file:
             config = yaml.safe_load(file)
         encoder_conf = config.get('encoder_conf', {})
+        logging.warning("encoder conf: {}".format(encoder_conf))
         self.encoder = SenseVoiceQuantizedEncoder(**encoder_conf)
         
         from .whisper_frontend import WhisperFrontend
         frontend_conf = config.get("frontend_conf", {})
+        logging.warning("frontend conf: {}".format(frontend_conf))
         self.frontend = WhisperFrontend(**frontend_conf)
 
+        # base model1
+        # /nfs/shixian.shi/workspace/models/funasr_results/asr/whisper/5m-8gpu/l6_fulldata_exp5_t0/ds-model.pt.ep1.340000
+        if ckpt is not None:
+            loaded = torch.load(ckpt)['state_dict']
+            logging.warning("Loaded model from {}.".format(ckpt))
+            for k in list(loaded.keys()):
+                if 'decoder' in k or (k.startswith("model.encoder.blocks.") and int(k.split('.')[3]) > 5):
+                    del loaded[k]
+            for k in list(loaded.keys()):
+                if k[14:] not in list(self.encoder.state_dict().keys()):
+                    logging.warning("Delete key in encoder: {}".format(k))
+                    del loaded[k]
+                else:
+                    loaded[k[14:]] = loaded[k]
+                    del loaded[k]
+                    logging.warning("Keeping key in encoder: {}".format(k[14:]))
+            # import pdb; pdb.set_trace()
+            self.encoder.load_state_dict(loaded)
+        
         # The model needs to be a nn.Module for finetuning, not required for representation extraction
         self.model1 = nn.Linear(1, HIDDEN_DIM)
         self.model2 = nn.Linear(HIDDEN_DIM, HIDDEN_DIM)
@@ -55,7 +78,7 @@ class UpstreamExpert(nn.Module):
         Since we do not do any downsampling in this example upstream
         All keys' corresponding representations have downsample rate of 1
         """
-        return 1
+        return 640
 
     def forward(self, wavs: List[Tensor]) -> Dict[str, Union[Tensor, List[Tensor]]]:
         """
@@ -64,12 +87,16 @@ class UpstreamExpert(nn.Module):
         """
 
         wavs = pad_sequence(wavs, batch_first=True).unsqueeze(-1)
-        # wavs: (batch_size, max_len, 1)
-        import pdb; pdb.set_trace()
-
-        hidden = self.model1(wavs)
+        wavs = wavs.squeeze(-1)
+        wavs_lens = torch.tensor([wavs.shape[-1]]*wavs.shape[0])
+        features, feature_lens = self.frontend(wavs, wavs_lens)
+        
+        encoder_out, encoder_out_lens = self.encoder(features, feature_lens)
+        quantize_out = self.encoder.quantize_enc_outs(encoder_out)
+        codes = self.encoder.quantizer.indices_to_codes(quantize_out[1]['indices'], project_out=False)
+        
+        hidden = codes
         # hidden: (batch_size, max_len, hidden_dim)
-
         feature = self.model2(hidden)
         # feature: (batch_size, max_len, hidden_dim)
 

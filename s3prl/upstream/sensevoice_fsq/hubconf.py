@@ -1,7 +1,7 @@
 from .expert import UpstreamExpert as _UpstreamExpert
 
 
-def my_entry_1(*args, **kwargs):
+def sensevoice_fsq(*args, **kwargs):
     """
     To enable your customized pretrained model, you only need to implement
     upstream/example/expert.py and leave this file as is. This file is
