@@ -25,9 +25,9 @@ optimizer:
 
 downstream_expert: 
   datarc:
-    file_path: /path/to/VoxCeleb1
+    file_path: /cpfs_speech/yfchen/data/voxceleb/voxceleb1
     meta_data: ./downstream/voxceleb1/veri_test_class.txt
-    num_workers: 12
+    num_workers: 4
     train_batch_size: 8
     eval_batch_size: 1
     max_timestep: 128000

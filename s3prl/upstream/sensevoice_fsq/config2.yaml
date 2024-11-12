@@ -1,0 +1,30 @@
+encoder: SenseVoiceQuantizedEncoder
+encoder_conf:
+    input_size: 128
+    attention_heads: 20
+    linear_units: 1280
+    num_blocks: 32
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    kernel_size: 31
+    sanm_shfit: 0
+    att_type: self_att_fsmn_sdpa #self_att_fsmn
+    downsample_rate: 4
+    use_padmask: true
+    max_position_embeddings: 2048
+    rope_theta: 10000
+    freeze: false
+    freeze_exclude_key: attn
+    quantize_layer_idx: 5
+    normalized_quant_input: false
+    quantizer_config:
+        levels: [3, 3, 3, 3, 3, 3, 3, 3]
+        num_codebooks: 1
+        name: finite_scalar_quantizer
+    units: 1280
+frontend_conf:
+    fs: 16000
+    n_mels: 128
+    do_pad_trim: false
+    filters_path: /nfs/beinian.lzr/workspace/models/funasr_results/asr/whisper/SenseVoiceFSQ_0918_l30/assets/mel_filters.npz

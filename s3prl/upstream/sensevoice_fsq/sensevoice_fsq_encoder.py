@@ -175,18 +175,19 @@ class SenseVoiceQuantizedEncoder(nn.Module):
 
         for layer, block in enumerate(self.blocks):
             x = block(x, mask=padding_mask, position_ids=position_ids)
-            if self.quantize_layer_idx is not None and self.quantizer is not None:
-                if layer == self.quantize_layer_idx:
-                    hint_once(
-                        f"Quantization at layer {layer} wit {self.quantizer}",
-                        "normalize_quant_enc_out",
-                        rank=0,
-                    )
-                    x, ret_dict = self.quantize_enc_outs(x)
-                    if only_extract_tokens:
-                        return (x, ret_dict), olens
+            # if self.quantize_layer_idx is not None and self.quantizer is not None:
+            #     if layer == self.quantize_layer_idx:
+            #         hint_once(
+            #             f"Quantization at layer {layer} wit {self.quantizer}",
+            #             "normalize_quant_enc_out",
+            #             rank=0,
+            #         )
+            #         x, ret_dict = self.quantize_enc_outs(x)
+            #         if only_extract_tokens:
+            #             return (x, ret_dict), olens
 
-        x = self.ln_post(x)
+        # remove ln_post
+        # x = self.ln_post(x)
 
         if ilens is None:
             return x

@@ -66,6 +66,8 @@ class UpstreamExpert(nn.Module):
                     loaded[k[14:]] = loaded[k]
                     del loaded[k]
                     logging.warning("Keeping key in encoder: {}".format(k[14:]))
+            # logging.warning("Ready to load: {}".format(loaded))
+            # import pdb; pdb.set_trace()
             self.encoder.load_state_dict(loaded)
         
         # The model needs to be a nn.Module for finetuning, not required for representation extraction
@@ -89,16 +91,16 @@ class UpstreamExpert(nn.Module):
         wavs = wavs.squeeze(-1)
         wavs_lens = torch.tensor([wavs.shape[-1]]*wavs.shape[0])
         features, feature_lens = self.frontend(wavs, wavs_lens)
-        
+         
         encoder_out, encoder_out_lens = self.encoder(features, feature_lens)
         quantize_out = self.encoder.quantize_enc_outs(encoder_out)
-        codes = self.encoder.quantizer.indices_to_codes(quantize_out[1]['indices'], project_out=False)
-        
-        hidden = codes
+        # codes = self.encoder.quantizer.indices_to_codes(quantize_out[1]['indices'])
+        # import pdb; pdb.set_trace()
+        hidden = encoder_out
         # hidden: (batch_size, max_len, hidden_dim)
-        feature = codes
+        feature = encoder_out
         # feature: (batch_size, max_len, hidden_dim)
-
+        # import pdb; pdb.set_trace()
         # The "hidden_states" key will be used as default in many cases
         # Others keys in this example are presented for SUPERB Challenge
         return {

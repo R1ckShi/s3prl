@@ -28,7 +28,7 @@ class DownstreamExpert(nn.Module):
         self.expdir = expdir
         self.upstream_dim = upstream_dim
         self.corpus = downstream_expert["corpus"]
-
+        
         # Text tokenizer
         self.tokenizer = load_text_encoder(**downstream_expert["text"])
 
