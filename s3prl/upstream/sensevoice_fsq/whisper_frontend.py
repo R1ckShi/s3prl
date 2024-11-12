@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 
-from funasr.register import tables
+# from funasr.register import tables
 from torch.nn.utils.rnn import pad_sequence
 
 
