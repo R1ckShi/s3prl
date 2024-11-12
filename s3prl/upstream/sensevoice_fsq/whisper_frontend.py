@@ -41,7 +41,7 @@ class WhisperFrontend(nn.Module):
         filters_path = kwargs.get("filters_path", None)
         self.filters_path = filters_path
         if filters_path is not None:
-            from funasr.models.sense_voice.whisper_lib.audio import mel_filters
+            from .whisper_lib_audio import mel_filters
 
             self.mel_filters = mel_filters
         else:
